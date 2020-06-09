@@ -28,14 +28,14 @@ import java.util.Queue;
 
 public class TrieImpl {
 
-    private final TrieNode root = new TrieNode();
+    private final TrieNode root = new TrieNode(' ');
 
     public void insert(String word) {
         TrieNode current = root;
         for (Character c : word.toCharArray()) {
             current = current.getOrCreateChild(c);
         }
-        current.setWord(word);
+        current.setWord();
     }
 
     public boolean contains(String word) {
@@ -83,7 +83,7 @@ public class TrieImpl {
             while (!children.isEmpty()) {
                 TrieNode child = children.poll();
                 if (child.isWord()) {
-                    closest.add(child.getValue());
+                    closest.add(child.value());
                 }
                 if (n == closest.size()) {
                     return;

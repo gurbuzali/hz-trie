@@ -21,25 +21,29 @@ import java.util.Map;
 import java.util.Set;
 
 public class TrieNode implements Comparable<TrieNode> {
-    
+
+    TrieNode parent;
+
     private final Map<Character, TrieNode> children = new HashMap<>();
-    private String word;
+    private final char c;
     private long weight;
 
-    public TrieNode() {
+    public TrieNode(char c) {
+        this.c = c;
     }
 
     public boolean isWord() {
-        return word != null;
+        return weight != 0;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setWord() {
         weight += 1;
     }
 
     public TrieNode getOrCreateChild(Character c) {
-        return children.computeIfAbsent(c, k -> new TrieNode());
+        TrieNode child = children.computeIfAbsent(c, k -> new TrieNode(c));
+        child.parent = this;
+        return child;
     }
 
     public TrieNode getChild(Character c) {
@@ -50,8 +54,15 @@ public class TrieNode implements Comparable<TrieNode> {
         return children.entrySet();
     }
 
-    public String getValue() {
-        return word;
+    public String value() {
+        StringBuilder builder = new StringBuilder();
+        TrieNode cur = this;
+        while (cur != null) {
+            builder.append(cur.c);
+            cur = cur.parent;
+        }
+        builder.setLength(builder.length()-1);
+        return builder.reverse().toString();
     }
 
     @Override
