@@ -21,16 +21,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class TrieImpl {
+
     private final TrieNode root = new TrieNode();
 
     public void insert(String word) {
         TrieNode current = root;
-        for(Character c: word.toCharArray()) {
+        for (Character c : word.toCharArray()) {
             current = current.getOrCreateChild(c);
         }
         current.setWord(word);
@@ -43,7 +45,7 @@ public class TrieImpl {
 
     private TrieNode searchInternal(String word) {
         TrieNode current = root;
-        for(Character c: word.toCharArray()) {
+        for (Character c : word.toCharArray()) {
             TrieNode child = current.getChild(c);
             if (child == null) {
                 return null;
@@ -73,19 +75,19 @@ public class TrieImpl {
         while (!toTraverse.isEmpty() && closest.size() < n) {
             TrieNode node = Objects.requireNonNull(toTraverse.poll());
             PriorityQueue<TrieNode> children = new PriorityQueue<>();
-            for (Character childKey : node.childrenKeys()) {
-                TrieNode child = node.getChild(childKey);
-                if (child != null) {
-                    children.add(child);
-                    toTraverse.add(child);
-                }
+            for (Map.Entry<Character, TrieNode> entry : node.childrenSet()) {
+                TrieNode child = entry.getValue();
+                children.add(child);
+                toTraverse.add(child);
             }
             while (!children.isEmpty()) {
                 TrieNode child = children.poll();
                 if (child.isWord()) {
                     closest.add(child.getValue());
                 }
-                if (n == closest.size()) return;
+                if (n == closest.size()) {
+                    return;
+                }
             }
         }
     }

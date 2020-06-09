@@ -16,11 +16,12 @@
 
 package com.hazelcast.projectx.trie;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class TrieNode implements Comparable<TrieNode> {
+    
     private final Map<Character, TrieNode> children = new HashMap<>();
     private String word;
     private long weight;
@@ -28,7 +29,7 @@ public class TrieNode implements Comparable<TrieNode> {
     public TrieNode() {
     }
 
-    public boolean isWord(){
+    public boolean isWord() {
         return word != null;
     }
 
@@ -45,8 +46,8 @@ public class TrieNode implements Comparable<TrieNode> {
         return children.get(c);
     }
 
-    public Collection<Character> childrenKeys() {
-        return children.keySet();
+    public Set<Map.Entry<Character, TrieNode>> childrenSet() {
+        return children.entrySet();
     }
 
     public String getValue() {

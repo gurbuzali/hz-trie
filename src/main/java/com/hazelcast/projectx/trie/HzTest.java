@@ -21,47 +21,79 @@ import com.hazelcast.config.ServiceConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.internal.util.ExceptionUtil;
-import com.hazelcast.spi.properties.ClusterProperty;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+
 public class HzTest {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         startInstance();
         HazelcastInstance instance = startInstance();
 
         ITrie trie = instance.getDistributedObject(TrieService.NAME, "test");
+        populate(trie, true);
 
-        long begin = System.currentTimeMillis();
-        Path books = Paths.get("books");
-        Pattern delimiter = Pattern.compile("\\W+");
-        Files.list(books)
-             .parallel()
-             .flatMap(HzTest::lines)
-             .flatMap(line -> Arrays.stream(delimiter.split(line)))
-             .filter(word -> word.length() > 1)
-             .forEach(trie::insert);
-        long elapsed = System.currentTimeMillis() - begin;
-        System.out.println("populated in " + elapsed + " ms.");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-
-
-        System.out.println(trie.closest("sto", 5));
-
-        System.out.println(trie.closest("fak", 5));
+        do {
+            try {
+                System.out.print("Input: \t");
+                String line = reader.readLine();
+                String[] input = line.split(" ");
+                System.out.println("Words closest to " + input[0]);
+                System.out.println(trie.closest(input[0], Integer.parseInt(input[1])));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } while (true);
     }
 
     private static HazelcastInstance startInstance() {
         return Hazelcast.newHazelcastInstance(new TrieConfig());
+    }
+
+    static void populate(ITrie trie, boolean isLite) throws Exception {
+        long begin = System.currentTimeMillis();
+        Path books = Paths.get(isLite ? "books-lite" : "books");
+        Pattern delimiter = Pattern.compile("\\W+");
+        List<Thread> threadList =
+                Files.list(books)
+                     .map(p -> new Thread(() -> {
+                         lines(p).flatMap(line -> Arrays.stream(delimiter.split(line)))
+                                 .filter(word -> word.length() > 1)
+                                 .forEach(trie::insert);
+                     }))
+                     .collect(toList());
+
+        for (Thread thread : threadList) {
+            thread.start();
+        }
+
+        for (Thread thread : threadList) {
+            thread.join();
+        }
+        long elapsed = System.currentTimeMillis() - begin;
+        System.out.println("populated in " + elapsed + " ms.");
+    }
+
+    static Stream<String> lines(Path path) {
+        try {
+            return Files.lines(path);
+        } catch (IOException e) {
+            throw ExceptionUtil.sneakyThrow(e);
+        }
     }
 
     static class TrieConfig extends Config {
@@ -72,14 +104,6 @@ public class HzTest {
                             .setName(TrieService.NAME)
                             .setClassName(TrieService.class.getName())
             );
-        }
-    }
-
-    static Stream<String> lines(Path path) {
-        try {
-            return Files.lines(path);
-        } catch (IOException e) {
-            throw ExceptionUtil.sneakyThrow(e);
         }
     }
 }
