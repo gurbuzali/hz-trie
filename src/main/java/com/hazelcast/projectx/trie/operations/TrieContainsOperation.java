@@ -16,30 +16,16 @@
 
 package com.hazelcast.projectx.trie.operations;
 
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.projectx.trie.TrieImpl;
 import com.hazelcast.projectx.trie.TrieService;
-import com.hazelcast.spi.impl.operationservice.Operation;
 
-import java.io.IOException;
-
-public class TrieContainsOperation extends Operation {
-    private String name;
-    private String word;
-    private boolean response;
+public class TrieContainsOperation extends TrieOperation {
 
     public TrieContainsOperation() {
     }
 
-    public TrieContainsOperation(final String name, final String word) {
-        this.name = name;
-        this.word = word;
-    }
-
-    @Override
-    public Object getResponse() {
-        return response;
+    public TrieContainsOperation(String name, String word) {
+        super(name, word);
     }
 
     @Override
@@ -47,17 +33,5 @@ public class TrieContainsOperation extends Operation {
         TrieService service = getService();
         TrieImpl trie = service.getTrie(name);
         response = trie.contains(word);
-    }
-
-    protected void writeInternal(ObjectDataOutput out) throws IOException {
-        super.writeInternal(out);
-        out.writeUTF(name);
-        out.writeUTF(word);
-    }
-
-    protected void readInternal(ObjectDataInput in) throws IOException {
-        super.readInternal(in);
-        name = in.readUTF();
-        word = in.readUTF();
     }
 }

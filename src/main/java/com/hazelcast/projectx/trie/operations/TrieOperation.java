@@ -18,37 +18,45 @@ package com.hazelcast.projectx.trie.operations;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.projectx.trie.TrieImpl;
 import com.hazelcast.projectx.trie.TrieService;
+import com.hazelcast.spi.impl.operationservice.Operation;
 
 import java.io.IOException;
 
-public class TrieClosestOperation extends TrieOperation {
+public abstract class TrieOperation extends Operation {
 
-    private int n;
+    String name;
+    String word;
 
-    public TrieClosestOperation() {
+    Object response;
+
+    public TrieOperation() {
     }
 
-    public TrieClosestOperation(String name, String prefix, int n) {
-        super(name, prefix);
-        this.n = n;
+    public TrieOperation(String name, String word) {
+        this.name = name;
+        this.word = word;
     }
 
     @Override
-    public void run() {
-        TrieService service = getService();
-        TrieImpl trie = service.getTrie(name);
-        response = trie.closest(word, n);
+    public String getServiceName() {
+        return TrieService.NAME;
+    }
+
+    @Override
+    public Object getResponse() {
+        return response;
     }
 
     protected void writeInternal(ObjectDataOutput out) throws IOException {
         super.writeInternal(out);
-        out.write(n);
+        out.writeUTF(name);
+        out.writeUTF(word);
     }
 
     protected void readInternal(ObjectDataInput in) throws IOException {
         super.readInternal(in);
-        n = in.readInt();
+        name = in.readUTF();
+        word = in.readUTF();
     }
 }

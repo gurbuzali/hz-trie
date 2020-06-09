@@ -20,7 +20,6 @@ import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.client.impl.spi.ClientContext;
 import com.hazelcast.client.impl.spi.ClientProxy;
 import com.hazelcast.internal.serialization.Data;
-import com.hazelcast.partition.strategy.StringPartitioningStrategy;
 import com.hazelcast.projectx.trie.codec.TrieClosestCodec;
 import com.hazelcast.projectx.trie.codec.TrieContainsCodec;
 import com.hazelcast.projectx.trie.codec.TrieInsertCodec;
@@ -28,34 +27,57 @@ import com.hazelcast.projectx.trie.codec.TrieInsertCodec;
 import java.util.Collection;
 
 public class ClientTrieProxy extends ClientProxy implements ITrie {
+
+
     protected ClientTrieProxy(String serviceName, String name, ClientContext context) {
         super(serviceName, name, context);
     }
 
     @Override
     public boolean insert(String value) {
+        checkIfEmpty(value);
+
         ClientMessage request = TrieInsertCodec.encodeRequest(name, value);
-        ClientMessage response = invoke(request);
+        ClientMessage response = invokeOnPartition(request, partitionId(value));
         return TrieInsertCodec.decodeResponse(response).response;
     }
 
     @Override
     public boolean contains(String value) {
+        checkIfEmpty(value);
+
         ClientMessage request = TrieContainsCodec.encodeRequest(name, value);
-        ClientMessage response = invoke(request);
+        ClientMessage response = invokeOnPartition(request, partitionId(value));
         return TrieContainsCodec.decodeResponse(response).response;
     }
 
     @Override
     public Collection<String> closest(String prefix, int n) {
+        checkIfEmpty(prefix);
+        checkCount(n);
+
         Data data = toData(prefix);
+        int partitionId = partitionId(prefix);
         ClientMessage request = TrieClosestCodec.encodeRequest(name, data, n);
-        ClientMessage response = invoke(request);
+        ClientMessage response = invokeOnPartition(request, partitionId);
         return TrieClosestCodec.decodeResponse(response).response;
     }
 
-    @Override
-    public String getPartitionKey() {
-        return StringPartitioningStrategy.getPartitionKey(name);
+    private void checkIfEmpty(String word) {
+        if (word == null || word.isEmpty()) {
+            throw new IllegalArgumentException("Word cannot be empty");
+        }
     }
+
+    private void checkCount(int n) {
+        if (n < 1) {
+            throw new IllegalArgumentException("Count should be positive integer");
+        }
+    }
+
+    private int partitionId(String word) {
+        Character firstChar = word.charAt(0);
+        return getContext().getPartitionService().getPartitionId(firstChar);
+    }
+
 }

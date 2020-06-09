@@ -16,7 +16,6 @@
 
 package com.hazelcast.projectx.trie;
 
-import com.hazelcast.internal.util.ExceptionUtil;
 import com.hazelcast.projectx.trie.operations.TrieClosestOperation;
 import com.hazelcast.projectx.trie.operations.TrieContainsOperation;
 import com.hazelcast.projectx.trie.operations.TrieInsertOperation;
@@ -25,9 +24,9 @@ import com.hazelcast.spi.impl.NodeEngine;
 import com.hazelcast.spi.impl.operationservice.Operation;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
 public class ServerTrieProxy extends AbstractDistributedObject<TrieService> implements ITrie {
+
     private final String name;
 
     public ServerTrieProxy(String name, NodeEngine nodeEngine, TrieService service) {
@@ -37,32 +36,27 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
 
     @Override
     public boolean insert(String value) {
-        Operation operation = new TrieInsertOperation(name, value).setPartitionId(getPartitionId(toData(value))).setServiceName(getServiceName());
-        try {
-            return this.<Boolean>invokeOnPartition(operation).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw ExceptionUtil.sneakyThrow(e);
-        }
+        checkIfEmpty(value);
+
+        Operation operation = new TrieInsertOperation(name, value).setPartitionId(partitionId(value));
+        return this.<Boolean>invokeOnPartition(operation).joinInternal();
     }
 
     @Override
     public boolean contains(String value) {
-        Operation operation = new TrieContainsOperation(name, value).setPartitionId(getPartitionId(toData(value))).setServiceName(getServiceName());
-        try {
-            return this.<Boolean>invokeOnPartition(operation).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw ExceptionUtil.sneakyThrow(e);
-        }
+        checkIfEmpty(value);
+
+        Operation operation = new TrieContainsOperation(name, value).setPartitionId(partitionId(value));
+        return this.<Boolean>invokeOnPartition(operation).joinInternal();
     }
 
     @Override
     public Collection<String> closest(String prefix, int n) {
-        Operation operation = new TrieClosestOperation(name, prefix, n).setPartitionId(getPartitionId(toData(prefix + n))).setServiceName(getServiceName());
-        try {
-            return this.<Collection<String>>invokeOnPartition(operation).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw ExceptionUtil.sneakyThrow(e);
-        }
+        checkIfEmpty(prefix);
+        checkCount(n);
+
+        Operation operation = new TrieClosestOperation(name, prefix, n).setPartitionId(partitionId(prefix));
+        return this.<Collection<String>>invokeOnPartition(operation).joinInternal();
     }
 
     @Override
@@ -74,4 +68,22 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
     public String getServiceName() {
         return TrieService.NAME;
     }
+
+    private void checkCount(int n) {
+        if (n<1) {
+            throw new IllegalArgumentException("Count should be positive integer");
+        }
+    }
+
+    private void checkIfEmpty(String word) {
+        if (word == null || word.isEmpty()) {
+            throw new IllegalArgumentException("Word cannot be empty");
+        }
+    }
+
+    private int partitionId(String word) {
+        Character firstChar = word.charAt(0);
+        return getNodeEngine().getPartitionService().getPartitionId(firstChar);
+    }
+
 }
