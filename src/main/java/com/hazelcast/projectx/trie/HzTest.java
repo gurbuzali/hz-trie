@@ -23,6 +23,9 @@ import com.hazelcast.core.HazelcastInstance;
 
 public class HzTest {
     public static void main(String[] args) {
+        startInstance();
+        startInstance();
+
         HazelcastInstance instance = startInstance();
         ITrie trie = instance.getDistributedObject(TrieService.NAME, "test");
 

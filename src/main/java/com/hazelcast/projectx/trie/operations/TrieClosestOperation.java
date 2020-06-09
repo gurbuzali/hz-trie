@@ -37,14 +37,12 @@ public class TrieClosestOperation extends TrieOperation {
 
     @Override
     public void run() {
-        TrieService service = getService();
-        TrieImpl trie = service.getTrie(name);
-        response = trie.closest(word, n);
+        response = getTrie().closest(word, n);
     }
 
     protected void writeInternal(ObjectDataOutput out) throws IOException {
         super.writeInternal(out);
-        out.write(n);
+        out.writeInt(n);
     }
 
     protected void readInternal(ObjectDataInput in) throws IOException {

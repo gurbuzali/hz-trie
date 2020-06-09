@@ -30,7 +30,7 @@ public class TrieService implements ManagedService, RemoteService {
     public static final String NAME = "TrieService";
     private NodeEngine nodeEngine;
 
-    private ConcurrentMap<String, TrieImpl> tries = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Integer, TrieContainer> containers = new ConcurrentHashMap<>();
 
     @Override
     public void init(NodeEngine nodeEngine, Properties properties) {
@@ -49,7 +49,6 @@ public class TrieService implements ManagedService, RemoteService {
 
     @Override
     public DistributedObject createDistributedObject(String name, UUID uuid, boolean b) {
-        tries.put(name, new TrieImpl());
         return new ServerTrieProxy(name, nodeEngine, this);
     }
 
@@ -58,7 +57,20 @@ public class TrieService implements ManagedService, RemoteService {
 
     }
 
-    public TrieImpl getTrie(String name) {
-        return tries.get(name);
+    public TrieImpl lazyGet(int partitionId, String trieName) {
+        return getOrCreateContainer(partitionId).getOrCreate(trieName);
+    }
+
+    private TrieContainer getOrCreateContainer(int partitionId) {
+        TrieContainer container = containers.get(partitionId);
+        if (container != null) {
+            return container;
+        }
+        container = new TrieContainer();
+        TrieContainer existing = containers.putIfAbsent(partitionId, container);
+        if (existing != null) {
+            container = existing;
+        }
+        return container;
     }
 }

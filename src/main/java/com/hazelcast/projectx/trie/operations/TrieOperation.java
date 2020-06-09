@@ -18,6 +18,7 @@ package com.hazelcast.projectx.trie.operations;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.projectx.trie.TrieImpl;
 import com.hazelcast.projectx.trie.TrieService;
 import com.hazelcast.spi.impl.operationservice.Operation;
 
@@ -36,6 +37,10 @@ public abstract class TrieOperation extends Operation {
     public TrieOperation(String name, String word) {
         this.name = name;
         this.word = word;
+    }
+
+    protected TrieImpl getTrie() {
+        return this.<TrieService>getService().lazyGet(getPartitionId(), name);
     }
 
     @Override

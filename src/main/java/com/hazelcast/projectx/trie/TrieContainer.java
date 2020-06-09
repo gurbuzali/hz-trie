@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.trie.operations;
+package com.hazelcast.projectx.trie;
 
-import com.hazelcast.projectx.trie.TrieImpl;
-import com.hazelcast.projectx.trie.TrieService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class TrieContainsOperation extends TrieOperation {
+public class TrieContainer {
+    private final ConcurrentMap<String, TrieImpl> tries = new ConcurrentHashMap<>();
 
-    public TrieContainsOperation() {
-    }
-
-    public TrieContainsOperation(String name, String word) {
-        super(name, word);
-    }
-
-    @Override
-    public void run() {
-        response = getTrie().contains(word);
+    public TrieImpl getOrCreate(String name) {
+        TrieImpl trie = tries.get(name);
+        if (trie != null) {
+            return trie;
+        }
+        trie = new TrieImpl();
+        TrieImpl existing = tries.putIfAbsent(name, trie);
+        if (existing != null) {
+            trie = existing;
+        }
+        return trie;
     }
 }

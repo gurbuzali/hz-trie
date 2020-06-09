@@ -16,9 +16,6 @@
 
 package com.hazelcast.projectx.trie.operations;
 
-import com.hazelcast.projectx.trie.TrieImpl;
-import com.hazelcast.projectx.trie.TrieService;
-
 public class TrieInsertOperation extends TrieOperation {
 
     public TrieInsertOperation() {
@@ -30,8 +27,6 @@ public class TrieInsertOperation extends TrieOperation {
 
     @Override
     public void run() {
-        TrieService service = getService();
-        TrieImpl trie = service.getTrie(name);
-        response = trie.insert(word);
+        response = getTrie().insert(word);
     }
 }
