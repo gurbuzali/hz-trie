@@ -1,4 +1,4 @@
-package com.hazelcast.projectx.service;
+package com.hazelcast.projectx.trie;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

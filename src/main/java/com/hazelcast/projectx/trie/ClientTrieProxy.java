@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service;
+package com.hazelcast.projectx.trie;
 
 import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.client.impl.spi.ClientContext;
 import com.hazelcast.client.impl.spi.ClientProxy;
 import com.hazelcast.internal.serialization.Data;
 import com.hazelcast.partition.strategy.StringPartitioningStrategy;
-import com.hazelcast.projectx.service.codec.TrieClosestCodec;
-import com.hazelcast.projectx.service.codec.TrieContainsCodec;
-import com.hazelcast.projectx.service.codec.TrieInsertCodec;
+import com.hazelcast.projectx.trie.codec.TrieClosestCodec;
+import com.hazelcast.projectx.trie.codec.TrieContainsCodec;
+import com.hazelcast.projectx.trie.codec.TrieInsertCodec;
 
 import java.util.Collection;
 

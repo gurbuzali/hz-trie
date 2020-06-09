@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service.operations;
+package com.hazelcast.projectx.trie.operations;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.projectx.service.TrieImpl;
-import com.hazelcast.projectx.service.TrieService;
+import com.hazelcast.projectx.trie.TrieImpl;
+import com.hazelcast.projectx.trie.TrieService;
 import com.hazelcast.spi.impl.operationservice.Operation;
 
 import java.io.IOException;

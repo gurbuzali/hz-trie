@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service;
+package com.hazelcast.projectx.trie;
 
 import com.hazelcast.internal.util.ExceptionUtil;
-import com.hazelcast.projectx.service.operations.TrieClosestOperation;
-import com.hazelcast.projectx.service.operations.TrieContainsOperation;
-import com.hazelcast.projectx.service.operations.TrieInsertOperation;
+import com.hazelcast.projectx.trie.operations.TrieClosestOperation;
+import com.hazelcast.projectx.trie.operations.TrieContainsOperation;
+import com.hazelcast.projectx.trie.operations.TrieInsertOperation;
 import com.hazelcast.spi.impl.AbstractDistributedObject;
 import com.hazelcast.spi.impl.NodeEngine;
 import com.hazelcast.spi.impl.operationservice.Operation;

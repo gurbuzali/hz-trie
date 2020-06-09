@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service;
+package com.hazelcast.projectx.trie;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service.operations;
+package com.hazelcast.projectx.trie.operations;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.projectx.service.TrieImpl;
-import com.hazelcast.projectx.service.TrieService;
+import com.hazelcast.projectx.trie.TrieImpl;
+import com.hazelcast.projectx.trie.TrieService;
 import com.hazelcast.spi.impl.operationservice.Operation;
 
 import java.io.IOException;
+import java.util.Collection;
 
-public class TrieInsertOperation extends Operation {
+public class TrieClosestOperation extends Operation {
     private String name;
-    private String word;
-    private boolean response;
+    private String prefix;
+    private int n;
+    private Collection<String> response;
 
-    public TrieInsertOperation() {
+    public TrieClosestOperation() {
     }
 
-    public TrieInsertOperation(final String name, final String word) {
+    public TrieClosestOperation(final String name, final String prefix, final int n) {
         this.name = name;
-        this.word = word;
-    }
-
-    @Override
-    public void run() {
-        TrieService service = getService();
-        TrieImpl trie = service.getTrie(name);
-        response = trie.insert(word);
+        this.prefix = prefix;
+        this.n = n;
     }
 
     @Override
@@ -49,15 +45,24 @@ public class TrieInsertOperation extends Operation {
         return response;
     }
 
+    @Override
+    public void run() {
+        TrieService service = getService();
+        TrieImpl trie = service.getTrie(name);
+        response = trie.closest(prefix, n);
+    }
+
     protected void writeInternal(ObjectDataOutput out) throws IOException {
         super.writeInternal(out);
         out.writeUTF(name);
-        out.writeUTF(word);
+        out.writeUTF(prefix);
+        out.write(n);
     }
 
     protected void readInternal(ObjectDataInput in) throws IOException {
         super.readInternal(in);
         name = in.readUTF();
-        word = in.readUTF();
+        prefix = in.readUTF();
+        n = in.readInt();
     }
 }

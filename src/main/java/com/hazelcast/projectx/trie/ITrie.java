@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service;
+package com.hazelcast.projectx.trie;
 
 import com.hazelcast.core.DistributedObject;
 

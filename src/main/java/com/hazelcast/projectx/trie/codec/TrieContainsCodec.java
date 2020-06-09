@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.service.codec;
+package com.hazelcast.projectx.trie.codec;
 
 import com.hazelcast.client.impl.protocol.ClientMessage;
 import com.hazelcast.client.impl.protocol.Generated;
 import com.hazelcast.client.impl.protocol.codec.builtin.*;
-import com.hazelcast.client.impl.protocol.codec.custom.*;
-
-import javax.annotation.Nullable;
 
 import static com.hazelcast.client.impl.protocol.ClientMessage.*;
 import static com.hazelcast.client.impl.protocol.codec.builtin.FixedSizeTypesCodec.*;
@@ -34,19 +31,19 @@ import static com.hazelcast.client.impl.protocol.codec.builtin.FixedSizeTypesCod
  */
 
 /**
- * insert a word into a trie
+ * searching if the trie contains the word
  */
-@Generated("18cc2327400cfc5b0b25211d419da03c")
-public final class TrieInsertCodec {
-    //hex: 0x210100
-    public static final int REQUEST_MESSAGE_TYPE = 2162944;
-    //hex: 0x210101
-    public static final int RESPONSE_MESSAGE_TYPE = 2162945;
+@Generated("70930f239ace65cd589b65250fc1b5c7")
+public final class TrieContainsCodec {
+    //hex: 0x210200
+    public static final int REQUEST_MESSAGE_TYPE = 2163200;
+    //hex: 0x210201
+    public static final int RESPONSE_MESSAGE_TYPE = 2163201;
     private static final int REQUEST_INITIAL_FRAME_SIZE = PARTITION_ID_FIELD_OFFSET + INT_SIZE_IN_BYTES;
     private static final int RESPONSE_RESPONSE_FIELD_OFFSET = RESPONSE_BACKUP_ACKS_FIELD_OFFSET + BYTE_SIZE_IN_BYTES;
     private static final int RESPONSE_INITIAL_FRAME_SIZE = RESPONSE_RESPONSE_FIELD_OFFSET + BOOLEAN_SIZE_IN_BYTES;
 
-    private TrieInsertCodec() {
+    private TrieContainsCodec() {
     }
 
     @edu.umd.cs.findbugs.annotations.SuppressFBWarnings({"URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"})
@@ -58,7 +55,7 @@ public final class TrieInsertCodec {
         public String name;
 
         /**
-         * Word for insert into trie
+         * Word to lookup in trie
          */
         public String word;
     }
@@ -66,7 +63,7 @@ public final class TrieInsertCodec {
     public static ClientMessage encodeRequest(String name, String word) {
         ClientMessage clientMessage = ClientMessage.createForEncode();
         clientMessage.setRetryable(false);
-        clientMessage.setOperationName("Trie.Insert");
+        clientMessage.setOperationName("Trie.Contains");
         Frame initialFrame = new Frame(new byte[REQUEST_INITIAL_FRAME_SIZE], UNFRAGMENTED_MESSAGE);
         encodeInt(initialFrame.content, TYPE_FIELD_OFFSET, REQUEST_MESSAGE_TYPE);
         encodeInt(initialFrame.content, PARTITION_ID_FIELD_OFFSET, -1);
@@ -90,7 +87,7 @@ public final class TrieInsertCodec {
     public static class ResponseParameters {
 
         /**
-         * <tt>True</tt> if the word was inserted to this trie, else <tt>false</tt>
+         * <tt>True</tt> if the word is in the trie, else <tt>false</tt>
          */
         public boolean response;
     }
