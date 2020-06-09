@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.trie.impl;
+package com.hazelcast.projectx.trie.map.impl;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
+import java.util.List;
 
 public class InternalTrie implements DataSerializable {
 
-    private TrieNode root = new TrieNode();
+    private final TrieNode root = new TrieNode();
 
     public InternalTrie() {
     }
@@ -51,6 +52,15 @@ public class InternalTrie implements DataSerializable {
         return trieNode != null;
     }
 
+    public List<String> closest(String word, int count) {
+        TrieNode node = searchInternal(word);
+        return null;
+    }
+
+    dfs() {
+
+    }
+
     private TrieNode searchInternal(String s) {
         TrieNode current = root;
         for(Character c: s.toCharArray()) {
@@ -72,4 +82,5 @@ public class InternalTrie implements DataSerializable {
     public void readData(ObjectDataInput in) throws IOException {
         root.readData(in);
     }
+
 }

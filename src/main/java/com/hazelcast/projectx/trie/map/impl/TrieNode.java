@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.trie.impl;
+package com.hazelcast.projectx.trie.map.impl;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
@@ -26,7 +26,8 @@ import java.util.Map;
 
 public class TrieNode implements DataSerializable {
 
-    private Map<Character, TrieNode> children = new HashMap<>();
+    private final Map<Character, TrieNode> children = new HashMap<>();
+
     private boolean terminate;
 
     public TrieNode() {

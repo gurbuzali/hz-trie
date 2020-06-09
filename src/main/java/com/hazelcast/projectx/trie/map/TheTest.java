@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx.trie;
+package com.hazelcast.projectx.trie.map;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
-import com.hazelcast.projectx.trie.impl.InsertEntryProcessor;
-import com.hazelcast.projectx.trie.impl.InternalTrie;
+import com.hazelcast.projectx.trie.map.impl.InsertEntryProcessor;
+import com.hazelcast.projectx.trie.map.impl.InternalTrie;
 
 import static com.hazelcast.config.InMemoryFormat.OBJECT;
 
