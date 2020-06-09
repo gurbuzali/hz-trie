@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx;
+package com.hazelcast.projectx.trie.impl;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.MapConfig;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.EntryProcessor;
-import com.hazelcast.map.IMap;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
@@ -29,21 +24,30 @@ import com.hazelcast.nio.serialization.DataSerializable;
 import java.io.IOException;
 import java.util.Map;
 
-import static com.hazelcast.config.InMemoryFormat.OBJECT;
+public class ContainsEntryProcessor implements DataSerializable, EntryProcessor<String, InternalTrie, Boolean> {
 
-public class TheTest {
+    private String word;
 
-    public static void main(String[] args) throws Exception {
-        Config config = new Config();
-        config.addMapConfig(new MapConfig().setName("trie").setInMemoryFormat(OBJECT));
-        HazelcastInstance instance = Hazelcast.newHazelcastInstance(config);
-
-        IMap<String, TrieImpl> map = instance.getMap("trie");
-
-        TrieImpl trie = new TrieImpl();
-        map.put("a", trie);
-
+    public ContainsEntryProcessor() {
     }
 
+    public ContainsEntryProcessor(String word) {
+        this.word = word;
+    }
 
+    @Override
+    public Boolean process(Map.Entry<String, InternalTrie> entry) {
+        InternalTrie trie = entry.getValue();
+        return trie.contains(word);
+    }
+
+    @Override
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeUTF(word);
+    }
+
+    @Override
+    public void readData(ObjectDataInput in) throws IOException {
+        word = in.readUTF();
+    }
 }

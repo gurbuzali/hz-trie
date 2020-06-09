@@ -14,49 +14,40 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx;
+package com.hazelcast.projectx.trie.impl;
 
+import com.hazelcast.map.EntryProcessor;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
-public class TrieNode implements DataSerializable {
+public class SearchEntryProcessor implements DataSerializable, EntryProcessor<String, InternalTrie, Boolean> {
 
-    private Map<Character, TrieNode> children;
+    private String word;
 
-    public TrieNode() {
+    public SearchEntryProcessor() {
     }
 
-    public TrieNode(Map<Character, TrieNode> children) {
-        this.children = children;
+    public SearchEntryProcessor(String word) {
+        this.word = word;
+    }
+
+    @Override
+    public Boolean process(Map.Entry<String, InternalTrie> entry) {
+        InternalTrie trie = entry.getValue();
+        return trie.search(word);
     }
 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
-        if (children == null) {
-            out.writeInt(0);
-        } else {
-            out.writeInt(children.size());
-            for (Map.Entry<Character, TrieNode> entry : children.entrySet()) {
-                out.writeChar(entry.getKey());
-                entry.getValue().writeData(out);
-            }
-        }
+        out.writeUTF(word);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
-        int size = in.readInt();
-        children = new HashMap<>(size);
-        for (int i = 0; i < size; i++) {
-            Character key = in.readChar();
-            TrieNode trieNode = new TrieNode();
-            trieNode.readData(in);
-            children.put(key, trieNode);
-        }
+        word = in.readUTF();
     }
 }

@@ -14,33 +14,40 @@
  * limitations under the License.
  */
 
-package com.hazelcast.projectx;
+package com.hazelcast.projectx.trie.impl;
 
+import com.hazelcast.map.EntryProcessor;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
+import java.util.Map;
 
-public class TrieImpl implements DataSerializable {
+public class InsertEntryProcessor implements DataSerializable, EntryProcessor<String, InternalTrie, Boolean> {
 
-    private TrieNode root;
+    private String word;
 
-    public TrieImpl() {
+    public InsertEntryProcessor() {
     }
 
-    public TrieImpl(TrieNode root) {
-        this.root = root;
+    public InsertEntryProcessor(String word) {
+        this.word = word;
+    }
+
+    @Override
+    public Boolean process(Map.Entry<String, InternalTrie> entry) {
+        InternalTrie trie = entry.getValue();
+        return trie.insert(word);
     }
 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
-        root.writeData(out);
+        out.writeUTF(word);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
-        root = new TrieNode();
-        root.readData(in);
+        word = in.readUTF();
     }
 }
