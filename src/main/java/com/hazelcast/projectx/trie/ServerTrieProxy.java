@@ -82,8 +82,8 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
     }
 
     private int partitionId(String word) {
-        Character firstChar = word.charAt(0);
-        return getNodeEngine().getPartitionService().getPartitionId(firstChar);
+        String firstTwoChars = word.substring(0, 2);
+        return getNodeEngine().getPartitionService().getPartitionId(firstTwoChars);
     }
 
 }
