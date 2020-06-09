@@ -37,6 +37,10 @@ public class HzTest {
 
         trie.insert("abce");
         trie.insert("abcf");
+        trie.insert("abcf");
+        trie.insert("abcf");
+        trie.insert("abcf");
+        trie.insert("abcg");
         trie.insert("abcg");
         trie.insert("abch");
         trie.insert("abchef");

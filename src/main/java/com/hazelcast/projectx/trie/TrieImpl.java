@@ -22,21 +22,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class TrieImpl {
-    private TrieNode root = new TrieNode();
+    private final TrieNode root = new TrieNode();
 
-    public boolean insert(String word) {
+    public void insert(String word) {
         TrieNode current = root;
         for(Character c: word.toCharArray()) {
             current = current.getOrCreateChild(c);
         }
-        if (current.isWord()) {
-            return false;
-        }
         current.setWord(word);
-        return true;
     }
 
     public boolean contains(String word) {
@@ -74,16 +71,21 @@ public class TrieImpl {
 
     private void closest(int n, List<String> closest, Queue<TrieNode> toTraverse) {
         while (!toTraverse.isEmpty() && closest.size() < n) {
-            TrieNode start = Objects.requireNonNull(toTraverse.poll());
-            for (Character childKey : start.childrenKeys()) {
-                if (n == closest.size()) return;
-                TrieNode child = start.getChild(childKey);
+            TrieNode node = Objects.requireNonNull(toTraverse.poll());
+            PriorityQueue<TrieNode> children = new PriorityQueue<>();
+            for (Character childKey : node.childrenKeys()) {
+                TrieNode child = node.getChild(childKey);
                 if (child != null) {
-                    if (child.isWord()) {
-                        closest.add(child.getValue());
-                    }
+                    children.add(child);
                     toTraverse.add(child);
                 }
+            }
+            while (!children.isEmpty()) {
+                TrieNode child = children.poll();
+                if (child.isWord()) {
+                    closest.add(child.getValue());
+                }
+                if (n == closest.size()) return;
             }
         }
     }

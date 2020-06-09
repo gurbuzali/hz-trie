@@ -30,8 +30,10 @@ class ClosestTest {
         trie.insert("abcd");
         trie.insert("abcde");
         trie.insert("abce");
+        trie.insert("abce");
+        trie.insert("abce");
 
-        assertThat(trie.closest("abc", 1)).contains("abcd");
+        assertThat(trie.closest("abc", 1)).contains("abce");
     }
 
     @Test

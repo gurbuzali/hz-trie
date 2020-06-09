@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TrieNode {
-    private Map<Character, TrieNode> children = new HashMap<>();
+public class TrieNode implements Comparable<TrieNode> {
+    private final Map<Character, TrieNode> children = new HashMap<>();
     private String word;
+    private long weight;
 
     public TrieNode() {
     }
@@ -33,6 +34,7 @@ public class TrieNode {
 
     public void setWord(String word) {
         this.word = word;
+        weight += 1;
     }
 
     public TrieNode getOrCreateChild(Character c) {
@@ -49,5 +51,10 @@ public class TrieNode {
 
     public String getValue() {
         return word;
+    }
+
+    @Override
+    public int compareTo(TrieNode other) {
+        return Long.compare(other.weight, weight);
     }
 }

@@ -27,6 +27,7 @@ public class TrieInsertOperation extends TrieOperation {
 
     @Override
     public void run() {
-        response = getTrie().insert(word);
+        getTrie().insert(word);
+        response = true;
     }
 }
