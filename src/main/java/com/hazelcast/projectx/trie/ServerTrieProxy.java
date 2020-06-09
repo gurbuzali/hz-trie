@@ -25,6 +25,10 @@ import com.hazelcast.spi.impl.operationservice.Operation;
 
 import java.util.Collection;
 
+import static com.hazelcast.projectx.trie.TrieUtil.checkCount;
+import static com.hazelcast.projectx.trie.TrieUtil.checkIfEmpty;
+import static com.hazelcast.projectx.trie.TrieUtil.partitionKey;
+
 public class ServerTrieProxy extends AbstractDistributedObject<TrieService> implements ITrie {
 
     private final String name;
@@ -38,7 +42,8 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
     public boolean insert(String value) {
         checkIfEmpty(value);
 
-        Operation operation = new TrieInsertOperation(name, value).setPartitionId(partitionId(value));
+        int partitionId = partitionId(partitionKey(value));
+        Operation operation = new TrieInsertOperation(name, value).setPartitionId(partitionId);
         return this.<Boolean>invokeOnPartition(operation).joinInternal();
     }
 
@@ -46,7 +51,8 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
     public boolean contains(String value) {
         checkIfEmpty(value);
 
-        Operation operation = new TrieContainsOperation(name, value).setPartitionId(partitionId(value));
+        int partitionId = partitionId(partitionKey(value));
+        Operation operation = new TrieContainsOperation(name, value).setPartitionId(partitionId);
         return this.<Boolean>invokeOnPartition(operation).joinInternal();
     }
 
@@ -55,7 +61,8 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
         checkIfEmpty(prefix);
         checkCount(n);
 
-        Operation operation = new TrieClosestOperation(name, prefix, n).setPartitionId(partitionId(prefix));
+        int partitionId = partitionId(partitionKey(prefix));
+        Operation operation = new TrieClosestOperation(name, prefix, n).setPartitionId(partitionId);
         return this.<Collection<String>>invokeOnPartition(operation).joinInternal();
     }
 
@@ -69,21 +76,9 @@ public class ServerTrieProxy extends AbstractDistributedObject<TrieService> impl
         return TrieService.NAME;
     }
 
-    private void checkCount(int n) {
-        if (n<1) {
-            throw new IllegalArgumentException("Count should be positive integer");
-        }
-    }
 
-    private void checkIfEmpty(String word) {
-        if (word == null || word.isEmpty()) {
-            throw new IllegalArgumentException("Word cannot be empty");
-        }
-    }
-
-    private int partitionId(String word) {
-        String firstTwoChars = word.substring(0, 2);
-        return getNodeEngine().getPartitionService().getPartitionId(firstTwoChars);
+    private int partitionId(String partitionKey) {
+        return getNodeEngine().getPartitionService().getPartitionId(partitionKey);
     }
 
 }

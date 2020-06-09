@@ -20,35 +20,44 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.ServiceConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.internal.util.ExceptionUtil;
+import com.hazelcast.spi.properties.ClusterProperty;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class HzTest {
-    public static void main(String[] args) {
-        startInstance();
-        startInstance();
 
+    public static void main(String[] args) throws IOException {
+
+        startInstance();
         HazelcastInstance instance = startInstance();
+
         ITrie trie = instance.getDistributedObject(TrieService.NAME, "test");
 
-        System.out.println(trie.insert("abcd"));
+        long begin = System.currentTimeMillis();
+        Path books = Paths.get("books");
+        Pattern delimiter = Pattern.compile("\\W+");
+        Files.list(books)
+             .parallel()
+             .flatMap(HzTest::lines)
+             .flatMap(line -> Arrays.stream(delimiter.split(line)))
+             .filter(word -> word.length() > 1)
+             .forEach(trie::insert);
+        long elapsed = System.currentTimeMillis() - begin;
+        System.out.println("populated in " + elapsed + " ms.");
 
-        System.out.println(trie.contains("abcd"));
-        System.out.println(trie.contains("abcd1"));
 
 
-        trie.insert("abce");
-        trie.insert("abcf");
-        trie.insert("abcf");
-        trie.insert("abcf");
-        trie.insert("abcf");
-        trie.insert("abcg");
-        trie.insert("abcg");
-        trie.insert("abch");
-        trie.insert("abchef");
-        trie.insert("abch1");
+        System.out.println(trie.closest("sto", 5));
 
-        System.out.println(trie.closest("abc", 2));
-        System.out.println(trie.closest("abc", 5));
-        System.out.println(trie.closest("abc", 7));
+        System.out.println(trie.closest("fak", 5));
     }
 
     private static HazelcastInstance startInstance() {
@@ -63,6 +72,14 @@ public class HzTest {
                             .setName(TrieService.NAME)
                             .setClassName(TrieService.class.getName())
             );
+        }
+    }
+
+    static Stream<String> lines(Path path) {
+        try {
+            return Files.lines(path);
+        } catch (IOException e) {
+            throw ExceptionUtil.sneakyThrow(e);
         }
     }
 }

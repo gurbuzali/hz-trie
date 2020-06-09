@@ -26,6 +26,10 @@ import com.hazelcast.projectx.trie.codec.TrieInsertCodec;
 
 import java.util.Collection;
 
+import static com.hazelcast.projectx.trie.TrieUtil.checkCount;
+import static com.hazelcast.projectx.trie.TrieUtil.checkIfEmpty;
+import static com.hazelcast.projectx.trie.TrieUtil.partitionKey;
+
 public class ClientTrieProxy extends ClientProxy implements ITrie {
 
 
@@ -38,7 +42,7 @@ public class ClientTrieProxy extends ClientProxy implements ITrie {
         checkIfEmpty(value);
 
         ClientMessage request = TrieInsertCodec.encodeRequest(name, value);
-        ClientMessage response = invokeOnPartition(request, partitionId(value));
+        ClientMessage response = invokeOnPartition(request, partitionId(partitionKey(value)));
         return TrieInsertCodec.decodeResponse(response).response;
     }
 
@@ -47,7 +51,7 @@ public class ClientTrieProxy extends ClientProxy implements ITrie {
         checkIfEmpty(value);
 
         ClientMessage request = TrieContainsCodec.encodeRequest(name, value);
-        ClientMessage response = invokeOnPartition(request, partitionId(value));
+        ClientMessage response = invokeOnPartition(request, partitionId(partitionKey(value)));
         return TrieContainsCodec.decodeResponse(response).response;
     }
 
@@ -57,27 +61,15 @@ public class ClientTrieProxy extends ClientProxy implements ITrie {
         checkCount(n);
 
         Data data = toData(prefix);
-        int partitionId = partitionId(prefix);
+
+        int partitionId = partitionId(partitionKey(prefix));
         ClientMessage request = TrieClosestCodec.encodeRequest(name, data, n);
         ClientMessage response = invokeOnPartition(request, partitionId);
         return TrieClosestCodec.decodeResponse(response).response;
     }
 
-    private void checkIfEmpty(String word) {
-        if (word == null || word.isEmpty()) {
-            throw new IllegalArgumentException("Word cannot be empty");
-        }
-    }
-
-    private void checkCount(int n) {
-        if (n < 1) {
-            throw new IllegalArgumentException("Count should be positive integer");
-        }
-    }
-
-    private int partitionId(String word) {
-        Character firstChar = word.charAt(0);
-        return getContext().getPartitionService().getPartitionId(firstChar);
+    int partitionId(String partitionKey) {
+        return getContext().getPartitionService().getPartitionId(partitionKey);
     }
 
 }
